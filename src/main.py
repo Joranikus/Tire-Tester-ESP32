@@ -3,6 +3,20 @@ import serial
 import matplotlib.pyplot as plt
 import numpy as np
 
+def numerical_derivaton(data: list, timeStamps: list):
+    outPut = []
+    for ix, element in enumerate(data):
+        if ix == 0:
+            outPut.append((data[ix + 1] - data[ix]) / (timeStamps[ix + 1] - timeStamps[ix]))
+
+        elif ix == len(data) - 1:
+            outPut.append((data[ix] - data[ix - 1]) / (timeStamps[ix] - timeStamps[ix - 1]))
+
+        else:
+            outPut.append((data[ix + 1] - data[ix - 1]) / (timeStamps[ix + 1] / timeStamps[ix - 1]))
+
+    return outPut
+
 def moving_average_filter(data, window_size=5):
     """Applies a simple moving average filter to the data."""
     return np.convolve(data, np.ones(window_size)/window_size, mode='valid')
