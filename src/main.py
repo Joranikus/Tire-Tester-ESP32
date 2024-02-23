@@ -4,18 +4,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def numerical_derivaton(data: list, timeStamps: list):
-    outPut = []
+    output = []
     for ix, element in enumerate(data):
         if ix == 0:
-            outPut.append((data[ix + 1] - data[ix]) / (timeStamps[ix + 1] - timeStamps[ix]))
+            try:
+                output.append((data[ix + 1] - data[ix]) / (timeStamps[ix + 1] - timeStamps[ix]))
+            except ZeroDivisionError:
+                output.append(0)
 
         elif ix == len(data) - 1:
-            outPut.append((data[ix] - data[ix - 1]) / (timeStamps[ix] - timeStamps[ix - 1]))
+            try:
+                output.append((data[ix] - data[ix - 1]) / (timeStamps[ix] - timeStamps[ix - 1]))
+            except ZeroDivisionError:
+                output.append(0)
 
         else:
-            outPut.append((data[ix + 1] - data[ix - 1]) / (timeStamps[ix + 1] - timeStamps[ix - 1]))
+            try:
+                output.append((data[ix + 1] - data[ix - 1]) / (timeStamps[ix + 1] - timeStamps[ix - 1]))
+            except ZeroDivisionError:
+                output.append(0)
 
-    return outPut
+    return output
 
 def moving_average_filter(data, window_size=5):
     """Applies a simple moving average filter to the data."""
