@@ -26,29 +26,14 @@
  * kan du da finne ut om dekket sklir mye. Da vil dekkmålingene være høyere en svingarm målingene.
 */
 
-MotorController motor(18, 6.0); // Placeholder for initial motor voltage, will be set via Python script
-WheelSpeedEncoder wheel_encoder(32, 33, 1000, 0.25, 30.0); // Placeholder values for wheel encoder settings
-SwivelEncoder swivel_encoder(27, 14, 500, 2, 315.0); // Placeholder values for swivel encoder settings
+MotorController motor(18, 6.0);
+WheelSpeedEncoder wheel_encoder(32, 33, 1000, 0.25, 74.0);
+SwivelEncoder swivel_encoder(27, 14, 500, 2, 315.0);
 Test test(motor, wheel_encoder, swivel_encoder);
 
 void setup() {
     Serial.begin(115200);
 }
-/*
-void loop() {
-
-    // Print the values
-    Serial.print("Distance: ");
-    Serial.print(swivel_encoder.get_total_distance_m());
-    Serial.print(" m, Speed: ");
-    Serial.print(swivel_encoder.get_speed_m_s());
-    Serial.print(" m/s, Acceleration: ");
-    Serial.print(swivel_encoder.get_acceleration_m_s2());
-    Serial.println(" m/s^2");
-
-    delay(300);
-}
-*/
 
 void loop() {
     if (Serial.available() > 0) {
@@ -97,3 +82,39 @@ void loop() {
         }
     }
 }
+
+//----------------------------------------TESTS--------------------------------------------
+
+/*
+void loop() {
+
+    // Print the values
+    Serial.print("Distance: ");
+    Serial.print(swivel_encoder.get_total_distance_m());
+    Serial.print(" m, Speed: ");
+    Serial.print(swivel_encoder.get_speed_m_s());
+    Serial.print(" m/s, Acceleration: ");
+    Serial.print(swivel_encoder.get_acceleration_m_s2());
+    Serial.println(" m/s^2");
+
+    delay(300);
+}
+*/
+
+/*
+void loop() {
+
+    // Print the values
+    Serial.print("Distance: ");
+    Serial.print(wheel_encoder.get_total_distance_m());
+    Serial.print(" m, Speed: ");
+    Serial.print(wheel_encoder.get_speed_m_s());
+    Serial.print(" m/s, Acceleration: ");
+    Serial.print(wheel_encoder.get_acceleration_m_s2());
+    Serial.println(" m/s^2");
+
+    delay(300);
+}
+*/
+
+//-----------------------------------------------------------------------------------------
