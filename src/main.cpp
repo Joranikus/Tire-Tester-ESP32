@@ -34,7 +34,7 @@ SwivelEncoder swivel_encoder(27, 14, 500, 2, 315.0);
 void setup() {
     Serial.begin(115200);
 }
-/*
+
 void loop() {
     if (Serial.available() > 0) {
         String command = Serial.readStringUntil('\n');
@@ -82,9 +82,9 @@ void loop() {
         }
     }
 }
-*/
-//----------------------------------------TESTS--------------------------------------------
 
+//----------------------------------------TESTS--------------------------------------------
+/*
 void loop() {
     // Print the values
     Serial.print("Distance Wheel: ");
@@ -93,6 +93,5 @@ void loop() {
     Serial.println(swivel_encoder.get_total_distance_m());
     delay(300);
 }
-
-
+*/
 //-----------------------------------------------------------------------------------------
