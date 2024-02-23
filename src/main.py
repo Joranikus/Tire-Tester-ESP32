@@ -45,8 +45,8 @@ def wait_for_start_signal(ser):
 
 def read_data(ser):
     print("Collecting data...")
-    wheel_data = {'time': [], 'speed': [], 'distance': [], 'acceleration': []}
-    swivel_data = {'time': [], 'speed': [], 'distance': [], 'acceleration': []}
+    wheel_data = {'time': [], 'position': []}
+    swivel_data = {'time': [], 'position': []}
     collecting_data = True
 
     while collecting_data:
@@ -61,16 +61,12 @@ def read_data(ser):
                 line = line.replace('Data: ', '')
                 try:
                     parts = line.split(',')
-                    if len(parts) == 7:
-                        timestamp, w_speed, w_distance, w_acceleration, s_speed, s_distance, s_acceleration = map(float, parts)
+                    if len(parts) == 3:
+                        timestamp, wheel_position, swivel_position = map(float, parts)
                         wheel_data['time'].append(timestamp)
-                        wheel_data['speed'].append(w_speed)
-                        wheel_data['distance'].append(w_distance)
-                        wheel_data['acceleration'].append(w_acceleration)
+                        wheel_data['position'].append(wheel_position)
                         swivel_data['time'].append(timestamp)
-                        swivel_data['speed'].append(s_speed)
-                        swivel_data['distance'].append(s_distance)
-                        swivel_data['acceleration'].append(s_acceleration)
+                        swivel_data['position'].append(swivel_position)
                 except ValueError as e:
                     print(f"Error processing line: '{line}' | Error: {e}")
 
@@ -78,9 +74,9 @@ def read_data(ser):
 
 def plot_data(wheel_data, swivel_data):
     print("Plotting data...")
-    fig, axs = plt.subplots(3, figsize=(10, 15), dpi=100)
-    metrics = ['speed', 'distance', 'acceleration']
-    titles = ['Speed (m/s)', 'Distance (m)', 'Acceleration (m/s^2)']
+    fig, axs = plt.subplots(2, figsize=(10, 10), dpi=100)
+    metrics = ['position']
+    titles = ['Wheel Position (m)', 'Swivel Position (m)']
 
     window_size = 5
 
@@ -96,7 +92,7 @@ def plot_data(wheel_data, swivel_data):
 
         axs[i].plot(adjusted_times, wheel_metric_filtered, label='Wheel')
         axs[i].plot(adjusted_times, swivel_metric_filtered, label='Swivel')
-        axs[i].set_title(f"{titles[i]} over Time")
+        axs[i].set_title(titles[i])
         axs[i].set_xlabel("Time (s)")
         axs[i].set_ylabel(titles[i])
         axs[i].legend()
@@ -110,27 +106,10 @@ def main():
     ser = serial.Serial(com_port, 115200, timeout=1)
     print(f"Serial connection established on {com_port}.")
 
-    # Configuration settings, ask only once at the beginning
-    wheel_diameter = input("Enter wheel diameter (mm): ")
-    distance_center_to_wheel = input("Enter distance from center to wheel (mm): ")
-    motor_voltage = input("Enter motor voltage (V): ")
-
-    # Send configuration commands
-    send_command(ser, f"set_wheel_diameter {wheel_diameter}")
-    send_command(ser, f"set_distance_center_to_wheel {distance_center_to_wheel}")
-    send_command(ser, f"set_motor_voltage {motor_voltage}")
-    time.sleep(2)  # Give some time for commands to be processed
-
     while True:
         user_command = input("Please enter the command to send to the ESP32 (type 'exit' to quit): ").strip()
         if user_command.lower() == 'exit':
             break  # Exit the loop and end the program
-        elif user_command.lower() == "run test":
-            # Prompt for additional test parameters
-            speed_percent = input("Enter motor speed percentage for the test: ")
-            acceleration_time = input("Enter motor acceleration time (s) for the test: ")
-            # Send the detailed run_test command with parameters
-            send_command(ser, f"{user_command} {speed_percent} {acceleration_time}")
         else:
             send_command(ser, user_command)
 
@@ -138,11 +117,6 @@ def main():
             if wait_for_start_signal(ser):
                 wheel_data, swivel_data = read_data(ser)
                 plot_data(wheel_data, swivel_data)
-
-        # After plotting, ask the user if they want to run another test
-        run_another = input("Run another test? (yes/no): ")
-        if run_another.lower() != 'yes':
-            break  # Exit the loop if the user does not want to run another test
 
 if __name__ == "__main__":
     main()

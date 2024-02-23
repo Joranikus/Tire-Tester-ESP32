@@ -29,7 +29,7 @@
 MotorController motor(18, 6.0);
 WheelSpeedEncoder wheel_encoder(32, 33, 1000, 0.25, 74.0);
 SwivelEncoder swivel_encoder(27, 14, 500, 2, 315.0);
-//Test test(motor, wheel_encoder, swivel_encoder);
+Test test(motor, wheel_encoder, swivel_encoder);
 
 void setup() {
     Serial.begin(115200);
