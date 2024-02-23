@@ -13,7 +13,7 @@ def numerical_derivaton(data: list, timeStamps: list):
             outPut.append((data[ix] - data[ix - 1]) / (timeStamps[ix] - timeStamps[ix - 1]))
 
         else:
-            outPut.append((data[ix + 1] - data[ix - 1]) / (timeStamps[ix + 1] / timeStamps[ix - 1]))
+            outPut.append((data[ix + 1] - data[ix - 1]) / (timeStamps[ix + 1] - timeStamps[ix - 1]))
 
     return outPut
 
