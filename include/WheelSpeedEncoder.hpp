@@ -38,6 +38,7 @@ public:
     }
 
     void reset_distance() {
+        encoder.clearCount();
         total_distance_m = 0;
     }
 

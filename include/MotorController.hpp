@@ -11,6 +11,7 @@ private:
     const int ledChannel = 0; // Use channel 0 for PWM
     const int resolution = 8; // 8-bit resolution, 0-255
     float current_speed_percentage = 0; // Tracks the last speed percentage set
+    bool is_motor_on = false; // Tracks the motor state
 
 public:
     MotorController(int pin, float voltage) : pwm_pin(pin), max_voltage(voltage) {
@@ -44,6 +45,12 @@ public:
         // Calculate PWM value considering the voltage scaling
         int pwmValue = static_cast<int>((percentage / 100.0) * 255.0 * (max_voltage / 12.0));
         ledcWrite(ledChannel, pwmValue);
+        // Update motor state
+        is_motor_on = (percentage > 0);
+    }
+
+    bool is_motor_running() const {
+        return is_motor_on;
     }
 };
 #endif //DEKKTESTER_MOTORCONTROLLER_HPP

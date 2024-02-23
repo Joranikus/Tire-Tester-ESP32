@@ -12,12 +12,14 @@ private:
     MotorController& motor_;
     WheelSpeedEncoder& wheel_encoder_;
     SwivelEncoder& swivel_encoder_;
+    float wheel_diameter_mm_;
+    float wheel_width_mm_;
+    float motor_voltage_;
+    float distance_from_center_to_wheel_mm_;
+    String material_type_;
     const unsigned int pre_motor_start_delay_ms_ = 1000; // Time before motor starts after test begins
     const unsigned int test_duration_ms_ = 5000; // Total duration of the test
-    unsigned long acceleration_end_time_ = 0; // Time when acceleration ends
-    bool is_accelerating_ = false; // Is motor currently accelerating
 
-    // Array to store collected data points
     struct DataPoint {
         float wheel_position;
         float swivel_position;
@@ -26,57 +28,62 @@ private:
     int num_data_points_ = 0; // Current number of data points collected
 
 public:
-    Test(MotorController& motor, WheelSpeedEncoder& wheel_encoder, SwivelEncoder& swivel_encoder)
-            : motor_(motor), wheel_encoder_(wheel_encoder), swivel_encoder_(swivel_encoder) {}
+    Test(MotorController& motor, WheelSpeedEncoder& wheel_encoder, SwivelEncoder& swivel_encoder,
+         float wheel_diameter_mm, float wheel_width_mm, float motor_voltage,
+         float distance_from_center_to_wheel_mm, String material_type)
+            : motor_(motor), wheel_encoder_(wheel_encoder), swivel_encoder_(swivel_encoder),
+              wheel_diameter_mm_(wheel_diameter_mm), wheel_width_mm_(wheel_width_mm),
+              motor_voltage_(motor_voltage), distance_from_center_to_wheel_mm_(distance_from_center_to_wheel_mm),
+              material_type_(material_type) {}
 
     void calibrate() {
         motor_.speed(50, 0); // Example calibration step
         delay(500);
         motor_.speed(0, 5); // Stop motor after brief run
         delay(500); // Stabilization delay
+
+        // Reset distance for both wheel and swivel encoders
         swivel_encoder_.reset_distance();
         wheel_encoder_.reset_distance();
     }
 
     void run_main_test(float speed_percent, unsigned int acceleration_time_s) {
+        // Serial communication for calibration and test start
         Serial.println("RUN_CALIBRATION");
         calibrate();
-
-        delay(1000); // Delay between calibration and test start for visibility
+        Serial.println("READY_FOR_DATA_COLLECTION");
+        Serial.println("START_TEST");
 
         unsigned long test_start_time = millis();
         unsigned long motor_start_time = test_start_time + pre_motor_start_delay_ms_;
         unsigned long next_data_collection_time = test_start_time;
         unsigned long current_time = 0;
-        is_accelerating_ = true;
-        acceleration_end_time_ = motor_start_time + (acceleration_time_s * 1000);
 
-        Serial.println("READY_FOR_DATA_COLLECTION");
-        Serial.println("START_TEST");
-
-        while (millis() - test_start_time < test_duration_ms_) {
+        while (true) {
             current_time = millis();
 
-            if (is_accelerating_ && current_time >= motor_start_time && current_time <= acceleration_end_time_) {
-                float incremental_speed = speed_percent * float(current_time - motor_start_time) / float(acceleration_time_s * 1000);
-                motor_.speed(incremental_speed, 0); // Set motor speed proportional to elapsed time
-                if (current_time >= acceleration_end_time_) {
-                    is_accelerating_ = false;
-                    motor_.speed(speed_percent, 0); // Ensure motor is at target speed after acceleration
-                }
+            // Start motor only after 1 second into the test
+            if (current_time >= motor_start_time && !motor_.is_motor_running()) {
+                motor_.speed(speed_percent, acceleration_time_s);
             }
 
             if (current_time >= next_data_collection_time) {
                 collect_data(current_time - test_start_time);
-                next_data_collection_time += 100; // Collect data every 100ms
+                next_data_collection_time += 50; // Collect data every 100ms
+            }
+
+            // Check if the test duration has been reached
+            if (current_time - test_start_time >= test_duration_ms_) {
+                break;  // Exit the loop when the test duration is reached
             }
         }
 
-        motor_.speed(0, 0); // Stop motor at the end of the test
+        // Stop motor at the end of the test
+        motor_.speed(0, 1);
         Serial.println("END_TEST");
 
-        // Send collected data to Python
-        send_data_to_python();
+        // Serial communication to send collected data to CSV
+        send_data_to_serial();
     }
 
     void collect_data(unsigned long elapsed_time) {
@@ -97,14 +104,37 @@ public:
         }
     }
 
-    void send_data_to_python() {
-        // Send collected data to Python over Serial
+    void send_data_to_serial() {
+
+        Serial.println("---------------start---------------");
+
+        Serial.println("Parameters:");
+        Serial.print("Wheel Diameter (mm): ");
+        Serial.println(wheel_diameter_mm_);
+        Serial.print("Wheel Width (mm): ");
+        Serial.println(wheel_width_mm_);
+        Serial.print("Motor Voltage (V): ");
+        Serial.println(motor_voltage_);
+        Serial.print("Distance From Center to Wheel (mm): ");
+        Serial.println(distance_from_center_to_wheel_mm_);
+        Serial.print("Material Type: ");
+        Serial.println(material_type_);
+        Serial.println();
+
+        // Serial communication to print data headers
+        Serial.println("Timestamp (ms),Wheel Position (m),Swivel Position (m)");
+
+        // Serial communication to print collected data
         for (int i = 0; i < num_data_points_; ++i) {
-            Serial.print("Data: ");
-            Serial.print(data_points_[i].timestamp); Serial.print(",");
-            Serial.print(data_points_[i].wheel_position); Serial.print(",");
+            Serial.print(data_points_[i].timestamp);
+            Serial.print(",");
+            Serial.print(data_points_[i].wheel_position);
+            Serial.print(",");
             Serial.println(data_points_[i].swivel_position);
         }
+
+        // Serial communication to print delimiter line after data
+        Serial.println("---------------end---------------");
     }
 };
 
