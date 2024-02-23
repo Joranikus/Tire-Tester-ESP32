@@ -29,12 +29,12 @@
 MotorController motor(18, 6.0);
 WheelSpeedEncoder wheel_encoder(32, 33, 1000, 0.25, 74.0);
 SwivelEncoder swivel_encoder(27, 14, 500, 2, 315.0);
-Test test(motor, wheel_encoder, swivel_encoder);
+//Test test(motor, wheel_encoder, swivel_encoder);
 
 void setup() {
     Serial.begin(115200);
 }
-
+/*
 void loop() {
     if (Serial.available() > 0) {
         String command = Serial.readStringUntil('\n');
@@ -82,39 +82,17 @@ void loop() {
         }
     }
 }
-
+*/
 //----------------------------------------TESTS--------------------------------------------
 
-/*
 void loop() {
-
     // Print the values
-    Serial.print("Distance: ");
-    Serial.print(swivel_encoder.get_total_distance_m());
-    Serial.print(" m, Speed: ");
-    Serial.print(swivel_encoder.get_speed_m_s());
-    Serial.print(" m/s, Acceleration: ");
-    Serial.print(swivel_encoder.get_acceleration_m_s2());
-    Serial.println(" m/s^2");
-
+    Serial.print("Distance Wheel: ");
+    Serial.println(wheel_encoder.get_total_distance_m());
+    Serial.print("Distance Swivel: ");
+    Serial.println(swivel_encoder.get_total_distance_m());
     delay(300);
 }
-*/
 
-/*
-void loop() {
-
-    // Print the values
-    Serial.print("Distance: ");
-    Serial.print(wheel_encoder.get_total_distance_m());
-    Serial.print(" m, Speed: ");
-    Serial.print(wheel_encoder.get_speed_m_s());
-    Serial.print(" m/s, Acceleration: ");
-    Serial.print(wheel_encoder.get_acceleration_m_s2());
-    Serial.println(" m/s^2");
-
-    delay(300);
-}
-*/
 
 //-----------------------------------------------------------------------------------------
