@@ -39,7 +39,7 @@ public:
     void calibrate() {
         motor_.speed(50, 0); // Example calibration step
         delay(50);
-        motor_.speed(0, 5); // Stop motor after brief run
+        motor_.speed(0, 3); // Stop motor after brief run
         delay(300); // Stabilization delay
 
         // Reset distance for both wheel and swivel encoders

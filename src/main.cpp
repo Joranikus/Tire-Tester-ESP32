@@ -4,14 +4,12 @@
 #include "SwivelEncoder.hpp"
 #include "MotorController.hpp"
 
-//----------------------------------------------------------------------------------------
 //----------------------------------------SETTINGS----------------------------------------
-//----------------------------------------------------------------------------------------
 
 //----------PARAMETERS----------
 float wheel_diameter_mm = 74;
 float wheel_width_mm = 30;
-float motor_voltage = 12;
+float motor_voltage = 9;
 float distance_from_center_to_wheel_mm = 315;
 String material_type = "TPU";
 
