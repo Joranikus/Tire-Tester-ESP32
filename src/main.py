@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
-
 def parse_parameters(input_string):
     parameters = {}
     lines = input_string.split('\n')
@@ -21,7 +20,6 @@ def parse_parameters(input_string):
                 parameters[key.strip()] = value.strip()
     return parameters
 
-# Function to parse data from the input string
 def parse_data(input_string):
     data = []
     lines = input_string.split('\n')
@@ -37,15 +35,11 @@ def parse_data(input_string):
             found_data = True
     return data
 
-# Function to run a test and collect data
 def run_test():
-    # Open serial port
-    ser = serial.Serial(com_port, 115200, timeout=1)
 
-    # Send start signal
+    ser = serial.Serial(com_port, 115200, timeout=1)
     ser.write(b't')
 
-    # Read data until end signal is received
     input_string = ''
     start_received = False
     while True:
@@ -58,25 +52,22 @@ def run_test():
         if start_received:
             input_string += line + '\n'
 
-    # Close serial port
     ser.close()
 
-    # Parse parameters and data
     parameters = parse_parameters(input_string)
     data = parse_data(input_string)
 
-    # Extracting timestamps and positions
     timestamps = np.array([entry[0] for entry in data])
     wheel_positions = np.array([entry[1] for entry in data])
     swivel_positions = np.array([entry[2] for entry in data])
 
-    # Calculating speed (1st derivative)
+    # calculating speed (1st derivative)
     dt = np.diff(timestamps)
     dwheel_dt = np.diff(wheel_positions) / dt
     dswivel_dt = np.diff(swivel_positions) / dt
     timestamps_speed = timestamps[:-1]
 
-    # Calculating acceleration (2nd derivative)
+    # calculating acceleration (2nd derivative)
     d2wheel_dt2 = np.diff(dwheel_dt) / dt[:-1]
     d2swivel_dt2 = np.diff(dswivel_dt) / dt[:-1]
     timestamps_acceleration = timestamps_speed[:-1]
@@ -91,9 +82,8 @@ for i in range(num_tests):
     test_data = run_test()
     all_data.append(test_data)
 
-    # Sleep for a brief period between tests if necessary
-    # Modify this if you find the need for a longer delay
-    time.sleep(1)
+    # sleep for a brief period between tests if necessary
+    time.sleep(0.5)
 
 # Calculate average data
 avg_timestamps = np.mean([data[0] for data in all_data], axis=0)
@@ -104,15 +94,15 @@ avg_dswivel_dt = np.mean([data[4] for data in all_data], axis=0)
 avg_d2wheel_dt2 = np.mean([data[5] for data in all_data], axis=0)
 avg_d2swivel_dt2 = np.mean([data[6] for data in all_data], axis=0)
 
-# Multiply speed by 1000
+# Multiply speed by 1000 for some reason? idk why
 avg_dwheel_dt *= 1000
 avg_dswivel_dt *= 1000
 
-# Multiply acceleration by 1000000
+# Multiply acceleration by 1000000 for some reason? idk why
 avg_d2wheel_dt2 *= 1000000
 avg_d2swivel_dt2 *= 1000000
 
-# Define the offsets for each dataset (in milliseconds)
+# Define the offsets for each dataset (in milliseconds) (because of numerical derivaion)
 offset_pos = 0  # Offset for position graph
 offset_speed = 50  # Offset for speed graph
 offset_accel = 100  # Offset for acceleration graph
